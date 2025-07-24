@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Number Guessing Game</title>
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      font-family: 'Segoe UI', sans-serif;
+      background: linear-gradient(135deg, #74ebd5, #ACB6E5);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      flex-direction: column;
+    }
+
+    .container {
+      background: white;
+      padding: 30px;
+      border-radius: 20px;
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+      max-width: 400px;
+      width: 100%;
+      text-align: center;
+      margin-top: 40px;
+    }
+
+    h1 {
+      margin-bottom: 20px;
+      color: #333;
+    }
+
+    button {
+      padding: 12px 24px;
+      margin: 10px 5px;
+      border: none;
+      border-radius: 30px;
+      background-color: #007bff;
+      color: white;
+      font-size: 16px;
+      cursor: pointer;
+      transition: transform 0.2s ease, background-color 0.3s;
+    }
+
+    button:hover {
+      transform: scale(1.05);
+      background-color: #0056b3;
+    }
+
+    .slideBox {
+      background: #f0f8ff;
+      padding: 0;
+      border-radius: 12px;
+      margin-top: 20px;
+      text-align: left;
+      max-height: 0;
+      overflow: hidden;
+      transition: max-height 0.5s ease-in-out, padding 0.3s;
+    }
+
+    .slideBox.show {
+      max-height: 300px;
+      padding: 15px;
+    }
+
+    #gameArea {
+      margin-top: 20px;
+      opacity: 0;
+      transform: translateY(20px);
+      transition: all 0.4s ease;
+      display: none;
+    }
+
+    #gameArea.show {
+      display: block;
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    input[type="text"], input[type="number"] {
+      padding: 12px;
+      font-size: 16px;
+      width: 100%;
+      border-radius: 8px;
+      border: 1px solid #ccc;
+      margin: 10px 0;
+      transition: border 0.3s;
+    }
+
+    input[type="text"]:focus, input[type="number"]:focus {
+      outline: none;
+      border-color: #007bff;
+    }
+
+    #feedback {
+      margin-top: 15px;
+      font-weight: bold;
+      font-size: 16px;
+      color: #333;
+    }
+
+    footer {
+      margin: 40px auto 20px;
+      text-align: center;
+      font-size: 14px;
+      color: #555;
+    }
+
+    footer a {
+      color: #007bff;
+      text-decoration: none;
+    }
+
+    footer a:hover {
+      text-decoration: underline;
+    }
+
+    footer hr {
+      margin: 30px 0 10px;
+      border: none;
+      border-top: 1px solid #ccc;
+      width: 100%;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    <h1>🎯 Guess the Number</h1>
+    <button onclick="toggleRules()">📜 Rules</button>
+    <button onclick="toggleStartPanel()">▶️ Play</button>
+
+    <!-- Rules Section -->
+    <div id="rulesBox" class="slideBox">
+      <h3>How to Play</h3>
+      <ul>
+        <li>Choose how many digits you want the number to have.</li>
+        <li>The system creates a random number with that many digits.</li>
+        <li>Guess the number – you'll be told how many digits are correct & in the correct place.</li>
+        <li>Keep guessing until you get it exactly right!</li>
+      </ul>
+    </div>
+
+    <!-- Start Game Input Panel -->
+    <div id="startPanel" class="slideBox">
+      <h3>Start Game</h3>
+      <label for="digitInput">How many digits?</label>
+      <input type="number" id="digitInput" min="1" placeholder="e.g. 4">
+      <button onclick="startGame()">Start</button>
+    </div>
+
+    <!-- Game Area -->
+    <div id="gameArea">
+      <p>Enter your guess:</p>
+      <input type="text" id="guessInput" placeholder="Your guess here">
+      <br>
+      <button onclick="submitGuess()">Submit Guess</button>
+      <div id="feedback"></div>
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <footer>
+    <hr>
+    <p>©Bennydog2021</p>
+    <p>
+      Join our Discord for more info: 
+      <a href="https://discord.gg/8qd6PNC5An" target="_blank">
+        https://discord.gg/8qd6PNC5An
+      </a>
+    </p>
+  </footer>
+
+  <script>
+    let randomNumber = '';
+    let digitCount = 0;
+
+    function toggleRules() {
+      document.getElementById('rulesBox').classList.toggle('show');
+    }
+
+    function toggleStartPanel() {
+      document.getElementById('startPanel').classList.toggle('show');
+    }
+
+    function startGame() {
+      const input = document.getElementById('digitInput').value;
+      digitCount = parseInt(input);
+
+      if (isNaN(digitCount) || digitCount <= 0) {
+        alert("Please enter a valid positive number.");
+        return;
+      }
+
+      generateRandomNumber();
+      document.getElementById('gameArea').classList.add('show');
+      document.getElementById('feedback').innerText = '';
+      document.getElementById('guessInput').value = '';
+      document.getElementById('startPanel').classList.remove('show');
+    }
+
+    function generateRandomNumber() {
+      randomNumber = '';
+      for (let i = 0; i < digitCount; i++) {
+        randomNumber += Math.floor(Math.random() * 10).toString();
+      }
+      console.log("DEBUG - Random Number:", randomNumber); // Hide in production
+    }
+
+    function submitGuess() {
+      const guess = document.getElementById('guessInput').value.trim();
+
+      if (guess.length !== digitCount || !/^\d+$/.test(guess)) {
+        document.getElementById('feedback').innerText = `❗ Enter a valid ${digitCount}-digit number.`;
+        return;
+      }
+
+      let correct = 0;
+      for (let i = 0; i < digitCount; i++) {
+        if (guess[i] === randomNumber[i]) correct++;
+      }
+
+      if (correct === digitCount) {
+        document.getElementById('feedback').innerText = `🎉 Correct! The number was ${randomNumber}. You win!`;
+      } else {
+        document.getElementById('feedback').innerText = `✅ ${correct} digit(s) in the correct position. Try again!`;
+      }
+    }
+  </script>
+</body>
+</html>
